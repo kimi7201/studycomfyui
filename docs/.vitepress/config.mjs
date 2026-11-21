@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 const isGhPages = Boolean(process.env.GITHUB_PAGES)
+const github = 'https://github.com/your-username/studycomfyui'
 
 export default defineConfig({
   title: 'StudyComfyUI',
@@ -12,18 +13,43 @@ export default defineConfig({
     ['meta', { name: 'theme-color', content: '#0a0e1a' }],
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
   ],
-  themeConfig: {
-    nav: [
-      { text: '首页', link: '/' },
-      { text: '快速开始', link: '/guide' },
-      { text: 'GitHub', link: 'https://github.com/your-username/studycomfyui' },
-    ],
-    footer: {
-      message: '学中做，做中学 · MIT Licensed',
-      copyright: 'Copyright © 2026 StudyComfyUI',
+  locales: {
+    root: {
+      label: '简体中文',
+      lang: 'zh-CN',
+      themeConfig: {
+        nav: [
+          { text: '首页', link: '/' },
+          { text: '快速开始', link: '/guide' },
+          { text: 'English', link: '/en/' },
+          { text: 'GitHub', link: github },
+        ],
+        footer: {
+          message: '学中做，做中学 · MIT Licensed',
+          copyright: 'Copyright © 2026 StudyComfyUI',
+        },
+        socialLinks: [{ icon: 'github', link: github }],
+      },
     },
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/your-username/studycomfyui' },
-    ],
+    en: {
+      label: 'English',
+      lang: 'en-US',
+      link: '/en/',
+      title: 'StudyComfyUI',
+      description: 'Understand ComfyUI workflows and build your own — learn by doing',
+      themeConfig: {
+        nav: [
+          { text: 'Home', link: '/en/' },
+          { text: 'Quick Start', link: '/en/guide' },
+          { text: '中文', link: '/' },
+          { text: 'GitHub', link: github },
+        ],
+        footer: {
+          message: 'Learn by doing, do by learning · MIT Licensed',
+          copyright: 'Copyright © 2026 StudyComfyUI',
+        },
+        socialLinks: [{ icon: 'github', link: github }],
+      },
+    },
   },
 })

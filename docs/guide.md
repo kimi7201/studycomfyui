@@ -40,4 +40,6 @@ npm run dev
 
 ## 文档维护
 
-新增或修改功能、接口、配置时，同步更新本文件、`README.md`（中英双语）和首页功能卡片，并运行 `npm run docs:build`。详细功能说明见项目 [README](https://github.com/your-username/studycomfyui)。
+新增或修改功能、接口、配置时，同步更新本文件、`docs/en/guide.md`、`README.md`（纯中文）和首页功能卡片（`docs/.vitepress/theme/Home.vue`），并运行 `npm run docs:build`。详细功能说明见项目 [README](https://github.com/your-username/studycomfyui)。
+
+[English version](/en/guide)
