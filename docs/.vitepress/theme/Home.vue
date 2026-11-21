@@ -12,6 +12,10 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 const homeLink = computed(() => withBase(isEn.value ? '/en/' : '/'))
 const guideLink = computed(() => withBase(isEn.value ? '/en/guide' : '/guide'))
 const langLink = computed(() => withBase(isEn.value ? '/' : '/en/'))
+const switchLang = (e) => {
+  e.preventDefault()
+  window.location.assign(langLink.value)
+}
 
 const zh = {
   navPain: '痛点', navFeatures: '主要工作', navHow: '如何工作', navColors: '改动标注', navDocs: '文档', langText: 'English',
@@ -143,7 +147,7 @@ const t = computed(() => (isEn.value ? en : zh))
         <a href="#how">{{ t.navHow }}</a>
         <a href="#colors">{{ t.navColors }}</a>
         <a :href="guideLink">{{ t.navDocs }}</a>
-        <a :href="langLink">{{ t.langText }}</a>
+        <a :href="langLink" @click="switchLang">{{ t.langText }}</a>
       </nav>
       <a class="sh-nav-cta" href="https://github.com/your-username/studycomfyui" target="_blank" rel="noreferrer">GitHub ↗</a>
     </header>
