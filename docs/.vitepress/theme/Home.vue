@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute, withBase } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 
-const route = useRoute()
-const isEn = computed(() => route.path.startsWith('/en'))
+const { lang } = useData()
+const isEn = computed(() => lang.value === 'en-US')
 const scrolled = ref(false)
 const onScroll = () => { scrolled.value = window.scrollY > 24 }
 onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))

@@ -4,14 +4,16 @@ const isGhPages = Boolean(process.env.GITHUB_PAGES)
 const github = 'https://github.com/your-username/studycomfyui'
 
 export default defineConfig({
+  lang: 'zh-CN',
   title: 'StudyComfyUI',
   description: '看懂 ComfyUI 工作流，改出属于自己的工作流 —— 学中做，做中学',
   base: isGhPages ? '/studycomfyui/' : '/',
   cleanUrls: true,
   lastUpdated: true,
+  vite: { build: { emptyOutDir: false } },
   head: [
     ['meta', { name: 'theme-color', content: '#0a0e1a' }],
-    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: `${isGhPages ? '/studycomfyui' : ''}/favicon.svg`, type: 'image/svg+xml' }],
   ],
   locales: {
     root: {
@@ -34,7 +36,6 @@ export default defineConfig({
     en: {
       label: 'English',
       lang: 'en-US',
-      link: '/en/',
       title: 'StudyComfyUI',
       description: 'Understand ComfyUI workflows and build your own — learn by doing',
       themeConfig: {
