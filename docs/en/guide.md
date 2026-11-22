@@ -26,8 +26,8 @@ Other scripts:
 
 ## Three Steps
 
-1. **Import**: Export the workflow JSON from ComfyUI, paste it into the workbench, and click "Analyze & Generate Learning Page".
-2. **Learn**: Review node-by-node explanations, parameter meanings, data flow, and the workflow graph. The workbench's Workflow Graph tab keeps the original ComfyUI coordinates by default: added nodes are placed next to related nodes, removed nodes remain in place as dashed ghost nodes, and change reasons are shown inline. Use "Focus changes" to zoom into the changed area, or switch to the functional-band view. Clicking a node opens an inspector panel on the right. In the exported standalone HTML, clicking a node opens a similar detail popup with its role, parameters, inputs/outputs, and typical upstream/downstream nodes. The diagram supports wheel/button zoom, drag to pan, and one-click fit-to-window.
+1. **Import**: Export the workflow JSON from ComfyUI, click "Upload JSON" in the workbench to select the file (or paste it into the input box), then click "Analyze & Generate Learning Page".
+2. **Learn**: Review node-by-node explanations, parameter meanings, data flow, and the workflow graph. The workbench's Workflow Graph tab keeps the original ComfyUI coordinates by default: added nodes are placed next to related nodes, removed nodes remain in place as dashed ghost nodes, and change reasons are shown inline. Use "Focus changes" to zoom into the changed area, or switch to the functional-band view. Clicking a node opens an inspector panel on the right. In the exported standalone HTML, clicking a node opens a similar detail popup with its role, parameters, inputs/outputs, and typical upstream/downstream nodes. The diagram supports wheel/button zoom, drag to pan, and one-click fit-to-window. The exported page can download the modified workflow JSON and a dependency manifest JSON, and lists model files, target directories, custom nodes, and available `git clone` addresses.
 3. **Modify**: Try a prompt like "add a LoRA node", check the reasons and steps in the modification log, then verify in ComfyUI.
 
 ## Model Configuration

@@ -165,6 +165,100 @@ function renderModifications(mods) {
   }).join('')
 }
 
+const MODEL_LOADERS = {
+  UNETLoader: 'unet_name',
+  LoraLoaderModelOnly: 'lora_name',
+  LoraLoader: 'lora_name',
+  CLIPLoader: 'clip_name',
+  VAELoader: 'vae_name',
+  UpscaleModelLoader: 'model_name',
+  ControlNetLoader: 'control_net_name',
+}
+const MODEL_DIRS = {
+  UNETLoader: 'models/unet',
+  LoraLoaderModelOnly: 'models/loras',
+  LoraLoader: 'models/loras',
+  CLIPLoader: 'models/text_encoders',
+  VAELoader: 'models/vae',
+  UpscaleModelLoader: 'models/upscale_models',
+  ControlNetLoader: 'models/controlnet',
+}
+const NODE_DEPS = {
+  'LayerUtility: ImageScaleByAspectRatio V2': {
+    custom: 'ComfyUI-LayerUtility',
+    clone: 'git clone https://github.com/ltdrdata/ComfyUI-LayerUtility.git',
+    note: '安装到 ComfyUI/custom_nodes 后重启 ComfyUI。',
+  },
+  QwenMultiangleCameraNode: {
+    custom: 'Qwen 多角度机位自定义节点',
+    clone: '',
+    note: '该节点来自工作流作者提供的自定义节点包，JSON 内未记录仓库地址；请用 ComfyUI Manager 搜索 QwenMultiangleCameraNode，或按工作流来源安装后重启。',
+  },
+  'easy string': {
+    custom: 'ComfyUI-Easy-Use',
+    clone: 'git clone https://github.com/yolandew/ComfyUI-Easy-Use.git',
+    note: '安装到 ComfyUI/custom_nodes 后重启 ComfyUI。',
+  },
+  'easy showAnything': {
+    custom: 'ComfyUI-Easy-Use',
+    clone: 'git clone https://github.com/yolandew/ComfyUI-Easy-Use.git',
+    note: '调试预览节点；安装后重启 ComfyUI。',
+  },
+  KepStringList: {
+    custom: 'Kep 系列自定义节点',
+    clone: '',
+    note: 'JSON 内未记录仓库地址；请用 ComfyUI Manager 搜索 KepStringList，或按工作流来源安装后重启。',
+  },
+  'Text Concatenate': { custom: 'ComfyUI 内置', clone: '', note: '需要较新版本的 ComfyUI。' },
+  PreviewImage: { custom: 'ComfyUI 内置', clone: '', note: '无需额外安装；若缺失请升级 ComfyUI。' },
+  UpscaleModelLoader: { custom: 'ComfyUI 内置', clone: '', note: '需另外准备超分模型文件，放到 models/upscale_models。' },
+}
+
+function depsForType(type) {
+  return NODE_DEPS[type] || { custom: 'ComfyUI 内置', clone: '', note: '' }
+}
+
+function buildDependencies(page) {
+  const api = page.apiWorkflow || {}
+  const models = []
+  for (const [id, def] of Object.entries(api)) {
+    const field = MODEL_LOADERS[def.class_type]
+    const file = field ? def.inputs?.[field] : null
+    if (file) models.push({ id, type: def.class_type, file: String(file), dir: MODEL_DIRS[def.class_type] || 'models' })
+  }
+  const latest = [...(page.modifications || [])].reverse()[0]
+  const added = (latest?.changes?.addedNodes || []).map((n) => {
+    const dep = depsForType(n.type)
+    return { id: n.id, type: n.type, custom: dep.custom, clone: dep.clone, note: dep.note, reason: n.reason || '' }
+  })
+  const custom = new Map()
+  for (const n of (page.workflow?.nodes || [])) {
+    const dep = depsForType(n.type)
+    if (dep.custom.startsWith('ComfyUI 内置')) continue
+    if (!custom.has(dep.custom)) custom.set(dep.custom, { note: dep.note, clone: dep.clone })
+  }
+  return { models, added, custom: [...custom].map(([name, info]) => ({ name, note: info.note, clone: info.clone })) }
+}
+
+function renderDependencies(deps) {
+  const modelRows = deps.models.map((m) => `<tr><td>${esc(m.id)}</td><td>${esc(m.type)}</td><td class="pval">${esc(m.file)}</td><td><code>${esc(m.dir)}</code></td></tr>`).join('')
+  const addedRows = deps.added.map((n) => `<tr><td><b>${esc(n.type)}</b> <code>${esc(n.id)}</code></td><td>${esc(n.custom)}</td><td>${n.clone ? `<code>${esc(n.clone)}</code><br/>` : ''}${esc(n.note || '—')}</td><td>${esc(n.reason || '—')}</td></tr>`).join('')
+  const customRows = deps.custom.map((c) => `<li><b>${esc(c.name)}</b>${c.clone ? `<br/><code>${esc(c.clone)}</code>` : ''}${c.note ? `<br/>${esc(c.note)}` : ''}</li>`).join('')
+  return `<div class="card">
+    <p>下载下面的工作流 JSON 后，在 ComfyUI 里选择 <b>Workflow → Open</b> 导入。模型文件需自行下载并放到对应目录；自定义节点需安装后重启 ComfyUI。页面无法代替 ComfyUI 自动安装节点或下载大模型。</p>
+    <h3>新增节点需要什么</h3>
+    ${addedRows ? `<table><thead><tr><th>节点</th><th>来源</th><th>安装/配置说明</th><th>为什么新增</th></tr></thead><tbody>${addedRows}</tbody></table>` : '<p class="empty">本次没有新增节点。</p>'}
+    <h3>全流程用到的模型文件</h3>
+    ${modelRows ? `<table><thead><tr><th>节点 ID</th><th>加载器</th><th>文件名</th><th>放到 ComfyUI 目录</th></tr></thead><tbody>${modelRows}</tbody></table>` : '<p class="empty">未识别到模型加载节点。</p>'}
+    <h3>需要的自定义节点（含 git clone 地址）</h3>
+    ${customRows ? `<ul>${customRows}</ul>` : '<p class="empty">未识别到需要额外安装的自定义节点。</p>'}
+    <div class="export-actions">
+      <button type="button" id="dlWorkflow">下载改造后工作流 JSON</button>
+      <button type="button" id="dlDeps">下载依赖清单 JSON</button>
+    </div>
+  </div>`
+}
+
 export function generateLearningHtml(page) {
   const a = page.analysis || {}
   const flow = String(a.flowExplanation || '').split(/\n+/).filter(Boolean).map((line) => `<p>${esc(line)}</p>`).join('')
@@ -180,6 +274,10 @@ export function generateLearningHtml(page) {
   const details = buildNodeDetails(page)
   for (const [id, change] of Object.entries(reasonMap)) if (details[id]) details[id].change = change
   const nodeDetails = JSON.stringify(details).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
+  const deps = buildDependencies(page)
+  const safeJson = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
+  const workflowJson = safeJson(page.apiWorkflow || {})
+  const depsJson = safeJson(deps)
   const engineLabel = page.engine === 'llm' ? '大模型' : page.engine === 'assistant' ? 'CodeBuddy 助手' : '内置知识库'
 
   return `<!doctype html>
@@ -208,6 +306,7 @@ ul{padding-left:20px}li{margin:6px 0;color:#cbd5e1}.empty{color:#64748b}
 .modal-close{background:#1e293b;border:0;color:#cbd5e1;border-radius:8px;width:32px;height:32px;font-size:20px;line-height:1;cursor:pointer;flex:none}
 .modal-sec{margin:16px 0}.modal-sec h4{font-size:13px;color:#a5b4fc;margin:0 0 6px;letter-spacing:.04em}.modal-sec p{margin:4px 0;color:#cbd5e1;font-size:14px}
 .modal-list{list-style:none;padding:0;margin:6px 0}.modal-list li{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:13px}.modal-list .tag{color:#38bdf8;margin:0 8px}.modal-list code{color:#64748b;font-size:11px}
+.export-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.export-actions button{background:#312e81;border:1px solid #4f46e5;color:#e0e7ff;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}.export-actions button:hover{background:#4338ca;color:#fff}
 footer{color:#475569;font-size:12px;text-align:center;margin-top:50px}
 </style></head><body><div class="wrap">
 <h1>${esc(page.title)}</h1>
@@ -222,8 +321,34 @@ ${renderSvg(page.workflow, reasonMap)}
 ${a.keyInsights?.length ? `<h2>学习要点</h2><div class="card"><ul>${insights}</ul></div>` : ''}
 ${a.suggestions?.length ? `<h2>优化建议</h2><div class="card"><ul>${suggestions}</ul></div>` : ''}
 ${renderModifications(page.modifications)}
+<h2>导入 ComfyUI 前：依赖与模型</h2>
+${renderDependencies(deps)}
 <div id="nodeModal" class="modal-overlay" hidden><div class="modal-panel"><div id="nodeModalBody"></div></div></div>
 <script id="nodeDetails" type="application/json">${nodeDetails}</script>
+<script id="workflowJsonData" type="application/json">${workflowJson}</script>
+<script id="depsJsonData" type="application/json">${depsJson}</script>
+<script>
+(function(){
+  function download(btnId, dataId, name){
+    var btn = document.getElementById(btnId)
+    var data = document.getElementById(dataId)
+    if (!btn || !data) return
+    btn.addEventListener('click', function(){
+      var blob = new Blob([data.textContent], { type: 'application/json;charset=utf-8' })
+      var url = URL.createObjectURL(blob)
+      var a = document.createElement('a')
+      a.href = url
+      a.download = name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(function(){ URL.revokeObjectURL(url) }, 1500)
+    })
+  }
+  download('dlWorkflow', 'workflowJsonData', 'studycomfyui-workflow.json')
+  download('dlDeps', 'depsJsonData', 'studycomfyui-dependencies.json')
+})()
+</script>
 <script>
 (function(){
   var details = JSON.parse(document.getElementById('nodeDetails').textContent)

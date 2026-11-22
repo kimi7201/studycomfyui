@@ -1,11 +1,15 @@
 # 更新日志
 
-本文件记录项目功能与文档的可追踪变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
+本文件记录项目功能与文档的可追踪变更。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本标题格式为 `## [版本号] - YYYY-MM-DD`。
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-22
+
 ### 新增
 
+- **导出工作流与依赖清单**：导出的 HTML 可下载改造后工作流 JSON 和依赖清单 JSON，并列出模型文件、ComfyUI 目标目录、自定义节点及可确认的 `git clone` 地址；未记录来源的节点给出 ComfyUI Manager 搜索关键词。
+- **JSON 文件上传**：导入工作流时可点击「上传 JSON」选择本地 `.json` 文件，内容自动填入输入框，仍可补充关注点后再解读。
 - **中英双语文档站**：VitePress 站点新增英文语言环境（`/en/`），中英文首页、快速开始指南与导航栏互链；README 保持纯中文。
 - **GitHub Pages 部署适配**：文档站按 `/studycomfyui/` 子路径构建，图标路径与语言切换链接随 base 自动适配。
 - **节点点击解读（导出的 HTML）**：点击工作流图中任意节点，弹出解读层，显示作用、设计原因、参数解读、输入/输出连接与常见前后节点。
@@ -18,6 +22,7 @@
 
 ### 变更
 
+- README 重写项目定位：突出「不会 ComfyUI 的人也能用 AI 快速理解、改造并进入生产」的 AI 平权赋能，并补充零基础最短上手路径。
 - README 与中英文文档站指南同步补充：全部命令、接口清单、配置优先级、存储文件、维护约定、节点弹层与布局说明。
 - 工作流优化改造已写入示例学习页面：固定 `KSampler` 种子、移除 12 个空值/空拼接节点、六路机位提示词直连 `KepStringList`、新增 `PreviewImage(200)`、输出前缀改为 `QwenMultiAngle_`；改造记录中来源显示为「CodeBuddy 助手」。
 - 文档站语言判断从 `route.path` 改为 `useData().lang`，避免受 GitHub Pages 子路径影响。
@@ -27,10 +32,11 @@
 - GitHub Pages 英文站 `/en/` 因路径前缀误判而仍显示中文的问题。
 - GitHub Pages 子路径下 favicon 路径错误。
 - `KSampler` 参数错位：补上 `control_after_generate`，steps/cfg/sampler/scheduler/denoise 显示与取值恢复正常。
+- `UNETLoader`、`CLIPLoader`、`VAELoader`、`LoraLoaderModelOnly` 的控件名映射缺失，导致 API 格式里模型文件名为空、依赖清单识别不到模型。
 - 导出 HTML 缩放脚本中模板字符串把 `\s` 转义为 `s`，导致 viewBox 解析为 `NaN` 的问题。
 - 拖拽结构图后误触发节点弹层的问题。
 - 删除当前学习页面、点击「新建学习页面」时未清除页面记忆的问题。
 
-## [1.0.0]
+## [1.0.0] - 2026-11-21
 
 - 初始版本：ComfyUI 工作流解析、AI/内置知识库解读、学习页面本地保存与 HTML 导出、prompt 驱动的节点改造与差异标注。

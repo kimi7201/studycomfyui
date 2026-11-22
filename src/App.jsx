@@ -195,7 +195,7 @@ export default function App() {
               <div className="welcome-card">
                 <div className="welcome-icon"><Lightbulb size={26} /></div>
                 <h2>把工作流读懂，再动手改造</h2>
-                <p>粘贴一份 ComfyUI 工作流 JSON，工作台会自动识别每个节点的作用、参数含义与设计原因，生成一份可长期保存的学习页面。</p>
+                <p>上传或粘贴一份 ComfyUI 工作流 JSON，工作台会自动识别每个节点的作用、参数含义与设计原因，生成一份可长期保存的学习页面。</p>
               </div>
               <div className="feature-grid">
                 <div className="feature"><FileJson size={20} /><b>导入即解读</b><span>兼容 UI 格式与 API 格式，逐节点讲清参数为什么这样设。</span></div>

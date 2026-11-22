@@ -21,7 +21,7 @@ export default function Sidebar({ pages, activeId, onSelect, onDelete, onNew }) 
 
       <div className="page-list">
         {pages.length === 0 && (
-          <div className="side-empty">还没有学习页面<br />粘贴一份工作流开始吧</div>
+          <div className="side-empty">还没有学习页面<br />上传或粘贴一份工作流开始吧</div>
         )}
         {pages.map((page) => (
           <div
