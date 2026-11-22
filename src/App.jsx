@@ -20,8 +20,19 @@ export default function App() {
 
   const notify = (message, type = 'success') => setToast({ message, type })
 
+  const rememberPage = (id) => { try { localStorage.setItem('studycomfyui:activePage', id) } catch {} }
+  const forgetPage = () => { try { localStorage.removeItem('studycomfyui:activePage') } catch {} }
+  const recallPage = () => { try { return localStorage.getItem('studycomfyui:activePage') } catch { return null } }
+
   useEffect(() => {
-    api.listPages().then((d) => setPages(d.pages || [])).catch((e) => notify(e.message, 'error'))
+    api.listPages().then((d) => {
+      const list = d.pages || []
+      setPages(list)
+      const requested = new URLSearchParams(window.location.search).get('page')
+      const saved = recallPage()
+      const target = (requested && list.find((p) => p.id === requested)) || (saved && list.find((p) => p.id === saved)) || list[0]
+      if (target) loadPage(target.id)
+    }).catch((e) => notify(e.message, 'error'))
     api.getConfig().then(setConfig).catch(() => {})
   }, [])
 
@@ -41,6 +52,7 @@ export default function App() {
       const d = await api.getPage(id)
       setPage(d.page)
       setActiveId(id)
+      rememberPage(id)
       setTab('learn')
     } catch (e) { notify(e.message, 'error') }
   }
@@ -51,6 +63,7 @@ export default function App() {
       const d = await api.analyze(prompt)
       setPage(d.page)
       setActiveId(d.page.id)
+      rememberPage(d.page.id)
       setTab('learn')
       await refreshPages()
       notify(`学习页面「${d.page.title}」已生成`)
@@ -75,7 +88,7 @@ export default function App() {
     if (!window.confirm(`确定删除学习页面「${target.title}」吗？此操作不可恢复。`)) return
     try {
       await api.deletePage(target.id)
-      if (activeId === target.id) { setPage(null); setActiveId(null) }
+      if (activeId === target.id) { setPage(null); setActiveId(null); forgetPage() }
       await refreshPages()
       notify('学习页面已删除')
     } catch (e) { notify(e.message, 'error') }
@@ -84,6 +97,7 @@ export default function App() {
   const handleNew = () => {
     setPage(null)
     setActiveId(null)
+    forgetPage()
     setTab('learn')
   }
 
@@ -172,7 +186,7 @@ export default function App() {
               </div>
               <div className="tab-content">
                 {tab === 'learn' && <LearningView analysis={page.analysis} workflow={page.workflow} />}
-                {tab === 'graph' && <WorkflowGraph workflow={page.workflow} />}
+                {tab === 'graph' && <WorkflowGraph workflow={page.workflow} analysis={page.analysis} modifications={page.modifications} />}
                 {tab === 'mods' && <ModificationsView modifications={page.modifications} />}
               </div>
             </>

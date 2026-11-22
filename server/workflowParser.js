@@ -4,7 +4,7 @@
 const WIDGET_NAMES = {
   CheckpointLoaderSimple: ['ckpt_name'],
   CheckpointLoader: ['ckpt_name', 'config_name'],
-  KSampler: ['seed', 'steps', 'cfg', 'sampler_name', 'scheduler', 'denoise'],
+  KSampler: ['seed', 'control_after_generate', 'steps', 'cfg', 'sampler_name', 'scheduler', 'denoise'],
   KSamplerAdvanced: ['add_noise', 'ignore_eta', 'steps', 'cfg', 'sampler_name', 'scheduler', 'start_at_step', 'end_at_step', 'return_with_leftover_noise', 'denoise'],
   CLIPTextEncode: ['text'],
   EmptyLatentImage: ['width', 'height', 'batch_size'],

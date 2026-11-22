@@ -10,7 +10,6 @@ export default defineConfig({
   base: isGhPages ? '/studycomfyui/' : '/',
   cleanUrls: true,
   lastUpdated: true,
-  vite: { build: { emptyOutDir: false } },
   head: [
     ['meta', { name: 'theme-color', content: '#0a0e1a' }],
     ['link', { rel: 'icon', href: `${isGhPages ? '/studycomfyui' : ''}/favicon.svg`, type: 'image/svg+xml' }],

@@ -31,7 +31,7 @@ export default function ModificationsView({ modifications = [] }) {
                 <h2>改造需求</h2>
                 <p className="mod-prompt">{m.prompt}</p>
               </div>
-              <span className={`engine-tag ${m.engine}`}>{m.engine === 'llm' ? '大模型' : '内置规则'}</span>
+              <span className={`engine-tag ${m.engine}`}>{m.engine === 'llm' ? '大模型' : m.engine === 'assistant' ? 'CodeBuddy 助手' : '内置规则'}</span>
             </div>
             <p className="lead">{m.explanation}</p>
 
