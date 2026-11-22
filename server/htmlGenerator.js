@@ -245,7 +245,7 @@ function renderDependencies(deps) {
   const addedRows = deps.added.map((n) => `<tr><td><b>${esc(n.type)}</b> <code>${esc(n.id)}</code></td><td>${esc(n.custom)}</td><td>${n.clone ? `<code>${esc(n.clone)}</code><br/>` : ''}${esc(n.note || '—')}</td><td>${esc(n.reason || '—')}</td></tr>`).join('')
   const customRows = deps.custom.map((c) => `<li><b>${esc(c.name)}</b>${c.clone ? `<br/><code>${esc(c.clone)}</code>` : ''}${c.note ? `<br/>${esc(c.note)}` : ''}</li>`).join('')
   return `<div class="card">
-    <p>下载下面的工作流 JSON 后，在 ComfyUI 里选择 <b>Workflow → Open</b> 导入。模型文件需自行下载并放到对应目录；自定义节点需安装后重启 ComfyUI。页面无法代替 ComfyUI 自动安装节点或下载大模型。</p>
+    <p><b>给小白的说明：</b>下面的 JSON 是「改动后需要的配置提示」，ComfyUI 不会直接读取它。普通人建议先下载 <b>安装指南 MD</b>，按里面的文字步骤操作；依赖清单 JSON 主要给脚本或开发者核对用。模型要自己下载并放进对应目录，自定义节点要安装后重启 ComfyUI，页面无法自动完成这些安装。</p>
     <h3>新增节点需要什么</h3>
     ${addedRows ? `<table><thead><tr><th>节点</th><th>来源</th><th>安装/配置说明</th><th>为什么新增</th></tr></thead><tbody>${addedRows}</tbody></table>` : '<p class="empty">本次没有新增节点。</p>'}
     <h3>全流程用到的模型文件</h3>
@@ -254,9 +254,81 @@ function renderDependencies(deps) {
     ${customRows ? `<ul>${customRows}</ul>` : '<p class="empty">未识别到需要额外安装的自定义节点。</p>'}
     <div class="export-actions">
       <button type="button" id="dlWorkflow">下载改造后工作流 JSON</button>
-      <button type="button" id="dlDeps">下载依赖清单 JSON</button>
+      <button type="button" id="dlGuide">下载安装指南 MD</button>
+      <button type="button" id="dlDeps">下载依赖清单 JSON（给脚本用）</button>
     </div>
   </div>`
+}
+
+function buildInstallGuideMd(deps) {
+  const lines = []
+  lines.push('# StudyComfyUI 改造后安装指南')
+  lines.push('')
+  lines.push('## 先说明：这些文件分别是什么')
+  lines.push('')
+  lines.push('- `studycomfyui-workflow.json`：改造后的工作流，ComfyUI 里用 **Workflow → Open** 打开它。')
+  lines.push('- `studycomfyui-install-guide.md`：你现在看的这份文字版步骤，普通人按它做即可。')
+  lines.push('- `studycomfyui-dependencies.json`：机器可读的配置提示，主要给脚本或开发者用；**普通用户不用打开它**。')
+  lines.push('')
+  lines.push('ComfyUI 不会自动读取这些文件。模型需要你自己下载并放到对应目录，自定义节点需要安装后重启 ComfyUI。')
+  lines.push('')
+  lines.push('## 第 1 步：看这次新增了什么节点')
+  lines.push('')
+  if (deps.added.length) {
+    for (const n of deps.added) {
+      lines.push(`- 新增节点：${n.type}（ID ${n.id}），来源：${n.custom}。`)
+      if (n.note) lines.push(`  - 说明：${n.note}`)
+      if (n.reason) lines.push(`  - 为什么新增：${n.reason}`)
+    }
+  } else {
+    lines.push('- 本次没有新增节点。')
+  }
+  lines.push('')
+  lines.push('## 第 2 步：安装自定义节点')
+  lines.push('')
+  lines.push('进入你的 ComfyUI 安装目录下的 `custom_nodes` 文件夹。下面有仓库地址的节点，直接在终端执行对应命令；没有仓库地址的，打开 ComfyUI Manager 搜索节点名安装。')
+  lines.push('')
+  if (deps.custom.length) {
+    for (const c of deps.custom) {
+      lines.push(`### ${c.name}`)
+      lines.push('')
+      if (c.clone) lines.push('```bash', c.clone, '```')
+      if (c.note) lines.push('', c.note)
+      lines.push('')
+    }
+  } else {
+    lines.push('未识别到需要额外安装的自定义节点。')
+    lines.push('')
+  }
+  lines.push('## 第 3 步：下载并放置模型文件')
+  lines.push('')
+  lines.push('按下表下载模型，把文件复制到 ComfyUI 对应目录。文件名要保持一致，否则加载器会找不到。')
+  lines.push('')
+  lines.push('| 文件名 | 放到这个目录 |')
+  lines.push('| --- | --- |')
+  if (deps.models.length) {
+    for (const m of deps.models) lines.push(`| ${m.file} | ${m.dir} |`)
+  } else {
+    lines.push('| 未识别到模型文件 | — |')
+  }
+  lines.push('')
+  lines.push('## 第 4 步：重启 ComfyUI')
+  lines.push('')
+  lines.push('安装节点和放入模型后，完全关闭并重新启动 ComfyUI。')
+  lines.push('')
+  lines.push('## 第 5 步：打开改造后的工作流')
+  lines.push('')
+  lines.push('1. 在 ComfyUI 菜单选择 **Workflow → Open**。')
+  lines.push('2. 选择下载好的 `studycomfyui-workflow.json`。')
+  lines.push('3. 如果节点显示红色，说明对应自定义节点没装好；如果模型加载器报错，检查文件名和目录是否正确。')
+  lines.push('')
+  lines.push('## 常见问题')
+  lines.push('')
+  lines.push('- 节点变红：安装对应自定义节点后重启 ComfyUI。')
+  lines.push('- 提示找不到模型：确认文件名完全一致，并放在表中对应目录。')
+  lines.push('- Workflow 菜单里没有 Open：把 ComfyUI 升级到较新版本。')
+  lines.push('')
+  return lines.join('\n')
 }
 
 export function generateLearningHtml(page) {
@@ -278,6 +350,7 @@ export function generateLearningHtml(page) {
   const safeJson = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   const workflowJson = safeJson(page.apiWorkflow || {})
   const depsJson = safeJson(deps)
+  const installGuideMd = safeJson(buildInstallGuideMd(deps))
   const engineLabel = page.engine === 'llm' ? '大模型' : page.engine === 'assistant' ? 'CodeBuddy 助手' : '内置知识库'
 
   return `<!doctype html>
@@ -327,14 +400,17 @@ ${renderDependencies(deps)}
 <script id="nodeDetails" type="application/json">${nodeDetails}</script>
 <script id="workflowJsonData" type="application/json">${workflowJson}</script>
 <script id="depsJsonData" type="application/json">${depsJson}</script>
+<script id="installGuideData" type="application/json">${installGuideMd}</script>
 <script>
 (function(){
-  function download(btnId, dataId, name){
+  function download(btnId, dataId, name, mime, parse){
     var btn = document.getElementById(btnId)
     var data = document.getElementById(dataId)
     if (!btn || !data) return
     btn.addEventListener('click', function(){
-      var blob = new Blob([data.textContent], { type: 'application/json;charset=utf-8' })
+      var content = data.textContent
+      if (parse) content = JSON.parse(content)
+      var blob = new Blob([content], { type: mime || 'application/json;charset=utf-8' })
       var url = URL.createObjectURL(blob)
       var a = document.createElement('a')
       a.href = url
@@ -346,6 +422,7 @@ ${renderDependencies(deps)}
     })
   }
   download('dlWorkflow', 'workflowJsonData', 'studycomfyui-workflow.json')
+  download('dlGuide', 'installGuideData', 'studycomfyui-install-guide.md', 'text/markdown;charset=utf-8', true)
   download('dlDeps', 'depsJsonData', 'studycomfyui-dependencies.json')
 })()
 </script>
